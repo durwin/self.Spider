@@ -1,0 +1,48 @@
+__author__ = 'EvoStudio'
+#-*- coding: utf-8 -*-
+import urllib2
+import time
+from bs4 import BeautifulSoup
+
+# 爬取糗事百科最新八小时的热门内容
+headers = {
+        "Host": "www.qiushibaike.com",
+        "Referer": "http://www.qiushibaike.com/8hr/",
+        "User-Agent": 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) AppleWebKit/536.5 (KHTML, like Gecko) Chrome/19.0.1084.54 Safari/536.5'        # 为了防止IP被目标网站BAN掉，建议常更换user-agent
+}
+
+print "------------------------------Starting----------------------------"
+startTime = time.time()
+print "start time:", startTime
+file = open("d://No.%s.txt" % time.time(), 'a')
+
+# main process
+for page in range(1, 36):   # 一共35页内容
+    url = "http://www.qiushibaike.com/8hr/page/" + repr(page)
+
+    req = urllib2.Request(url)
+    for key in headers:
+        req.add_header(key, headers[key])
+
+    html = urllib2.urlopen(req).read()
+    content = BeautifulSoup(html)
+
+
+    tip_content = repr(content.select("[class~=content]")) #  段子的文本内容
+    thumb_content = content.find_all(attrs={"class": "thumb"})   #  有图片的段子
+    pic_src = content.select("img[src]")  # 输出所有图片的SRC地址
+
+
+    # print "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" + "Page %s" %page + "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+    # print tip_content  # 输出文本内容
+    # print thumb_content  # 输出图片URL地址
+    # print pic_src
+    file.write(tip_content)
+
+
+
+print "------------------------------ END ------------------------------"
+endTime = time.time()
+print "End Time:", endTime
+print "Process Time is :", (endTime - startTime)
+file.close()
