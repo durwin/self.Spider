@@ -1,0 +1,48 @@
+__author__ = 'EvoStudio'
+#-*- coding: utf-8 -*-
+import urllib2, time
+from bs4 import BeautifulSoup
+# 抓取豆瓣特定标签下的所有电影 （默认为 tag喜剧）,根据不同标签修改range参数
+headers = {
+        "Host": "movie.douban.com",
+        "Referer": "http://movie.douban.com/tag/",
+        "User-Agent": 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_3) AppleWebKit/536.5 (KHTML, like Gecko) Chrome/19.0.1084.54 Safari/536.5'
+        # 为了防止IP被目标网站BAN掉，建议常更换user-agent
+}
+
+tag = ['喜剧',  # 0 -5400
+       '爱情', # 0 -5460
+       '动画',  # 0 -3300
+       '科幻'  # 0 -2000
+]
+pageNum = 1
+startTime = time.time()
+print "start time:", startTime
+
+# main process
+for startNum in range(0, 2001, 20):
+    # 每页20个内容
+    tag = "科幻"
+    url = "http://movie.douban.com/tag/" + tag + "?start=" + repr(startNum) +"&type=T"
+
+    req = urllib2.Request(url)
+    for key in headers:
+        req.add_header(key, headers[key])
+
+    html = urllib2.urlopen(req).read()
+    content = BeautifulSoup(html)
+
+    # !!设置过滤条件,找到文本内容
+    movie_content = content.find_all(attrs={"class": "nbg"})
+
+
+    # print content
+    print '---------------------', 'Page %s' %pageNum, '---------------------'
+    # print movie_content  # 输出内容，未来可转存数据库或存为txt等格式
+    pageNum += 1
+
+
+print '--------------------','End', '--------------------'
+endTime = time.time()
+print "end time:",endTime
+print "Process time:", (endTime - startTime)
